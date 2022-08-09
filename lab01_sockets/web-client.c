@@ -94,7 +94,7 @@ int get_ip_from_hostname(char *hostname, char **ip) {
     return -1;
   }
 
-	struct sockaddr_in *ipv4 = (struct sockaddr_in *) res->ai_addr;
+  struct sockaddr_in *ipv4 = (struct sockaddr_in *) res->ai_addr;
   *ip = (char*) malloc(sizeof(char)*(strlen(inet_ntoa(ipv4->sin_addr)) + 1));
   strcpy(ip[0], inet_ntoa(ipv4->sin_addr));
 
