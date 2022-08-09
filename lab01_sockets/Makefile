@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-pthread -std=c11 -fsanitize=address
+CFLAGS=-pthread -std=c11 -fsanitize=address -D_POSIX_C_SOURCE=200112L
 #CFLAGS=-pthread -std=c11 -pedantic -Wextra -Wall -fsanitize=address -Wundef -Wpointer-arith -Wcast-align
 
 all: web-client
