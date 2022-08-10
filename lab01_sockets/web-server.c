@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
 
   /* Waits for client */
   struct sockaddr_in client_address;
-  socklen_t client_address_size = sizeof(client_address_size);
+  socklen_t client_address_size = sizeof(client_address);
   int client_socket_fd = accept(socket_fd, (struct sockaddr*)&client_address, &client_address_size);
   if (client_socket_fd == -1) {
     perror("accept");
