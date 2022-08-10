@@ -8,4 +8,6 @@
 
 ## Testing
 
-Run `test.sh` script.
+  - Run the test server `./web-server localhost 3000 /tmp`
+  - Run the clients `./web-client http://localhost:3000/index.html`
+  until the server's capacity goes out.
