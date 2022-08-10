@@ -29,6 +29,7 @@ int main(int argc, char **argv) {
   int yes = 1;
   if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
     perror("setsockopt");
+    free(ip);
     return 3;
   }
 
@@ -40,11 +41,13 @@ int main(int argc, char **argv) {
 
   if (bind(socket_fd, (struct sockaddr*)&server_address, sizeof(server_address)) == -1) {
     perror("bind");
+    free(ip);
     return 4;
   }
 
   if (listen(socket_fd, 1) == -1) {
     perror("listen");
+    free(ip);
     return 5;
   }
 
