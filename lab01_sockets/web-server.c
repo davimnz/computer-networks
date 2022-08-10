@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
 
 #include "./common/common.h"
 
@@ -24,6 +25,12 @@ int main(int argc, char **argv) {
 
   /* Welcome socket */
   int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+
+  /* Set welcome socket as non-blocking */
+  int flags;
+  if ((flags = fcntl(socket_fd, F_GETFL, 0)) == -1)
+    flags = 0;
+  fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK);
 
   /* Allow reuse address */
   int yes = 1;
@@ -51,20 +58,26 @@ int main(int argc, char **argv) {
     return 5;
   }
 
-  /* Waits for client */
   struct sockaddr_in client_address;
   socklen_t client_address_size = sizeof(client_address);
-  int client_socket_fd = accept(socket_fd, (struct sockaddr*)&client_address, &client_address_size);
-  if (client_socket_fd == -1) {
-    perror("accept");
-    return 6;
+  int client_socket_fd;
+  int clients_fd[3];
+  int i = 0;
+  while(1) {
+    client_socket_fd = accept(socket_fd, (struct sockaddr*)&client_address, &client_address_size);
+    if (client_socket_fd >= 0) {
+      clients_fd[i++] = client_socket_fd;
+      printf("Client IPv4: %s ; Client fd: %d\n", inet_ntoa(client_address.sin_addr), client_socket_fd);
+
+      if (i == 3) {
+        printf("Server out of capacity.\n");
+        break;
+      }
+    }
   }
 
-  printf("Client ipv4: %s\n", inet_ntoa(client_address.sin_addr));
-  printf("Sleeps for 10 seconds...\n");
-  sleep(10);
-
-  close(client_socket_fd);
+  for (int i = 0; i < 3; i++)
+    close(clients_fd[i]);
   free(ip);
   return 0;
 }

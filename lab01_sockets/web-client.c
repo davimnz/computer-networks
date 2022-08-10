@@ -43,8 +43,8 @@ int main(int argc, char **argv) {
       return 2;
     }
 
-    printf("Sleeps for 5 seconds...\n");
-    sleep(5);
+    printf("Sleeps for 20 seconds...\n");
+    sleep(15);
 
     free(object);
     free(hostname);
