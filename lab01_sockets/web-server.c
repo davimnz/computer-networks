@@ -8,8 +8,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
+#include <stdbool.h>
 
 #include "./common/common.h"
+
+int handle_connection(int* socket_fd);
 
 int main(int argc, char **argv) {
   if (argc != 4) {
@@ -33,11 +36,11 @@ int main(int argc, char **argv) {
     SOCK_STREAM, // TCP
     0);
 
-  /* Set welcome socket as non-blocking */
-  int flags;
-  if ((flags = fcntl(socket_fd, F_GETFL, 0)) == -1)
-    flags = 0;
-  fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK);
+  // /* Set welcome socket as non-blocking */
+  // int flags;
+  // if ((flags = fcntl(socket_fd, F_GETFL, 0)) == -1)
+  //   flags = 0;
+  // fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK);
 
   /* Allow reuse address */
   int yes = 1;
@@ -68,23 +71,41 @@ int main(int argc, char **argv) {
   struct sockaddr_in client_address;
   socklen_t client_address_size = sizeof(client_address);
   int client_socket_fd;
-  int clients_fd[3];
-  int i = 0;
+  
   while(1) {
     client_socket_fd = accept(socket_fd, (struct sockaddr*)&client_address, &client_address_size);
-    if (client_socket_fd >= 0) {
-      clients_fd[i++] = client_socket_fd;
+    if (client_socket_fd != -1) {
       printf("Client IPv4: %s ; Client fd: %d\n", inet_ntoa(client_address.sin_addr), client_socket_fd);
 
-      if (i == 3) {
-        printf("Server out of capacity.\n");
-        break;
-      }
+      handle_connection(&client_socket_fd);
     }
   }
 
-  for (int i = 0; i < 3; i++)
-    close(clients_fd[i]);
+
+  close(client_socket_fd);
   free(ip);
   return 0;
+}
+
+
+int handle_connection(int* socket_fd) {
+  char buffer[1024] = {'\0'};
+
+  while (true) {
+    memset(buffer, '\0', sizeof(buffer));
+
+    // recebe ate 20 bytes do cliente remoto
+    if (recv(*socket_fd, buffer, 1024, 0) == -1) {
+      perror("recv");
+      return 5;
+    }
+
+    printf("%s", buffer);
+
+    // envia de volta o buffer recebido como um echo
+    if (send(*socket_fd, buffer, 1024, 0) == -1) {
+      perror("send");
+      return 6;
+    }
+  }
 }
