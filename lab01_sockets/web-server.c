@@ -20,9 +20,17 @@ struct server {
 };
 typedef struct server server;
 
+struct client {
+  struct sockaddr_in addr;
+  socklen_t addr_len;
+  int socket;
+};
+typedef struct client client;
+
+
 void register_server(server *server, char *ip, int port);
 
-void *handle_connection(void *socket_fd);
+void *handle_connection(client *client);
 
 int main(int argc, char **argv)
 {
@@ -71,25 +79,23 @@ int main(int argc, char **argv)
     return 5;
   }
 
-  struct sockaddr_in client_address;
-  socklen_t client_address_size = sizeof(client_address);
-  int client_socket_fd;
+  client client;
 
   while (true)
   {
-    client_socket_fd = accept(server.socket, (struct sockaddr *)&client_address, &client_address_size);
-    if (client_socket_fd == -1)
+    client.socket = accept(server.socket, (struct sockaddr *)&client.addr, &client.addr_len);
+    if (client.socket == -1)
     {
       perror("accept");
       continue;
     }
 
-    printf("Client %s connected\n", inet_ntoa(client_address.sin_addr));
+    printf("Client %s connected\n", inet_ntoa(client.addr.sin_addr));
 
-    handle_connection(&client_socket_fd);
+    handle_connection(&client);
   }
 
-  close(client_socket_fd);
+  close(client.socket);
   free(ip);
   return 0;
 }
@@ -106,17 +112,15 @@ void register_server(server *server, char *ip, int port) {
     0);
 }
 
-void *handle_connection(void *socket_fd)
+void *handle_connection(client *client)
 {
-  int *fd = (int *) socket_fd;
-
   char buffer[1024] = {'\0'};
 
   while (true)
   {
     memset(buffer, '\0', sizeof(buffer));
 
-    if (recv(*fd, buffer, 1024, 0) == -1)
+    if (recv(client->socket, buffer, 1024, 0) == -1)
     {
       perror("recv");
       // return;
@@ -124,7 +128,7 @@ void *handle_connection(void *socket_fd)
 
     printf("%s", buffer);
 
-    if (send(*fd, buffer, 1024, 0) == -1)
+    if (send(client->socket, buffer, 1024, 0) == -1)
     {
       perror("send");
       // return;
