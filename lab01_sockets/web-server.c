@@ -28,7 +28,7 @@ struct client {
 typedef struct client client;
 
 
-void register_server(server *server, char *ip, int port);
+int register_server(server *server, char *ip, int port);
 
 void *handle_connection(client *client);
 
@@ -54,31 +54,6 @@ int main(int argc, char **argv)
   server server;
   register_server(&server, ip, atoi(port));
 
-  /* Allow reuse address */
-  int yes = 1;
-  if (setsockopt(server.socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
-  {
-    perror("setsockopt");
-    free(ip);
-    return 3;
-  }
-
-  /* Bind socket */
-  if (bind(server.socket, (struct sockaddr *)&server.addr, sizeof(server.addr)) == -1)
-  {
-    perror("bind");
-    free(ip);
-    return 4;
-  }
-
-  /* Listen to incoming connections */
-  if (listen(server.socket, 1) == -1)
-  {
-    perror("listen");
-    free(ip);
-    return 5;
-  }
-
   client client;
 
   while (true)
@@ -100,7 +75,7 @@ int main(int argc, char **argv)
   return 0;
 }
 
-void register_server(server *server, char *ip, int port) {
+int register_server(server *server, char *ip, int port) {
   (server->addr).sin_family = AF_INET;
   (server->addr).sin_addr.s_addr = inet_addr(ip);
   (server->addr).sin_port = htons(port);
@@ -110,6 +85,33 @@ void register_server(server *server, char *ip, int port) {
     AF_INET,     // IPV4
     SOCK_STREAM, // TCP
     0);
+
+  /* Allow reuse address */
+  int yes = 1;
+  if (setsockopt(server->socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
+  {
+    perror("setsockopt");
+    free(ip);
+    return 3;
+  }
+
+  /* Bind socket */
+  if (bind(server->socket, (struct sockaddr *)&server->addr, sizeof(server->addr)) == -1)
+  {
+    perror("bind");
+    free(ip);
+    return 4;
+  }
+
+  /* Listen to incoming connections */
+  if (listen(server->socket, 1) == -1)
+  {
+    perror("listen");
+    free(ip);
+    return 5;
+  }
+  
+  return 0;
 }
 
 void *handle_connection(client *client)
