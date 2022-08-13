@@ -17,14 +17,21 @@ int main(int argc, char **argv) {
     return 1;
   }
 
+  char *hostname = argv[1];
+  char *port = argv[2];
+  char *path = argv[3];
+
   char *ip;
-  if (get_ip_from_hostname(argv[1], &ip) != 0) {
+  if (get_ip_from_hostname(hostname, &ip) != 0) {
     perror("get_ip_from_hostname");
     return 2;
   }
 
   /* Welcome socket */
-  int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+  int socket_fd = socket(
+    AF_INET, // IPV4
+    SOCK_STREAM, // TCP
+    0);
 
   /* Set welcome socket as non-blocking */
   int flags;
@@ -42,9 +49,9 @@ int main(int argc, char **argv) {
 
   struct sockaddr_in server_address;
   server_address.sin_family = AF_INET;
-  server_address.sin_port = htons(atoi(argv[2]));
+  server_address.sin_port = htons(atoi(port));
   server_address.sin_addr.s_addr = inet_addr(ip);
-  memset(server_address.sin_zero, '\0', sizeof(server_address.sin_zero));
+  memset(server_address.sin_zero, '\0', sizeof(server_address.sin_zero)); // Not used when family is IPV4
 
   if (bind(socket_fd, (struct sockaddr*)&server_address, sizeof(server_address)) == -1) {
     perror("bind");
