@@ -13,7 +13,6 @@
 
 #include "./common/common.h"
 
-
 struct server {
   struct sockaddr_in addr;
   int socket;
@@ -32,11 +31,18 @@ int register_server(server *server, char *ip, int port);
 
 int register_client(client **client, struct sockaddr_in address, socklen_t address_len, int socket);
 
-int register_client(client **client, struct sockaddr_in address, socklen_t address_len, int socket) {
-  (*client)->addr = address;
-  (*client)->addr_len = address_len;
-  (*client)->socket = socket;
-}
+struct thread_pool {
+  int size;
+  pthread_t *threads;
+  bool *busy_status;
+};
+typedef struct thread_pool thread_pool;
+
+void new_thread_pool(thread_pool *pool, int pool_size);
+
+int get_free_thread(thread_pool *pool);
+
+int handle_task(thread_pool *pool, void *task, void *args);
 
 void *handle_connection(client *client);
 
@@ -62,6 +68,10 @@ int main(int argc, char **argv)
   server server;
   register_server(&server, ip, atoi(port));
 
+  int thread_count = 3;
+  thread_pool pool;
+  new_thread_pool(&pool, thread_count);
+
   while (true)
   {
     struct sockaddr_in conn_addr;
@@ -77,9 +87,11 @@ int main(int argc, char **argv)
     client *conn = malloc(sizeof(client));
     register_client(&conn, conn_addr, conn_addr_len, socket);
 
-    printf("Client %s connected\n", inet_ntoa(conn->addr.sin_addr));
-
-    handle_connection(conn);
+    if (handle_task(&pool, handle_connection, conn) == -1) {
+      close(socket);
+      free(conn);
+      continue;
+    }
   }
 
   free(ip);
@@ -125,8 +137,48 @@ int register_server(server *server, char *ip, int port) {
   return 0;
 }
 
+int register_client(client **client, struct sockaddr_in address, socklen_t address_len, int socket) {
+  (*client)->addr = address;
+  (*client)->addr_len = address_len;
+  (*client)->socket = socket;
+}
+
+void new_thread_pool(thread_pool *pool, int pool_size) {
+  pool->size = pool_size;
+  pool->threads = malloc(pool_size * sizeof(pthread_t));
+  pool->busy_status = calloc(pool_size, sizeof(bool));
+}
+
+int get_free_thread(thread_pool *pool) {
+  for (int i = 0; i < pool->size; i++) {
+    if (pool->busy_status[i] == false) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+int handle_task(thread_pool *pool, void *task, void *args) {
+  int thread_num = get_free_thread(pool);
+  if (thread_num == -1) {
+    fprintf(stderr, "Refusing connection: maximum number of threads reached\n");
+    return -1;
+  }
+
+  bool *busy_status = &(pool->busy_status[thread_num]);
+  pthread_t *thread = &(pool->threads[thread_num]);
+
+  *busy_status = true;
+
+  // spawn thread
+  // pass in task and args, probably need to pass the pool to make thread available after task completes?
+  pthread_create(&(*thread), NULL, task, args);
+}
+
 void *handle_connection(client *client)
 {
+  printf("Client %s connected\n", inet_ntoa(client->addr.sin_addr));
+
   char buffer[1024] = {'\0'};
 
   while (true)
