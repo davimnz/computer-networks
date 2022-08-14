@@ -30,6 +30,14 @@ typedef struct client client;
 
 int register_server(server *server, char *ip, int port);
 
+int register_client(client **client, struct sockaddr_in address, socklen_t address_len, int socket);
+
+int register_client(client **client, struct sockaddr_in address, socklen_t address_len, int socket) {
+  (*client)->addr = address;
+  (*client)->addr_len = address_len;
+  (*client)->socket = socket;
+}
+
 void *handle_connection(client *client);
 
 int main(int argc, char **argv)
@@ -54,23 +62,26 @@ int main(int argc, char **argv)
   server server;
   register_server(&server, ip, atoi(port));
 
-  client client;
-
   while (true)
   {
-    client.socket = accept(server.socket, (struct sockaddr *)&client.addr, &client.addr_len);
-    if (client.socket == -1)
+    struct sockaddr_in conn_addr;
+    socklen_t conn_addr_len;
+
+    int socket = accept(server.socket, (struct sockaddr *)&conn_addr, &conn_addr_len);
+    if (socket == -1)
     {
       perror("accept");
       continue;
     }
 
-    printf("Client %s connected\n", inet_ntoa(client.addr.sin_addr));
+    client *client = malloc(sizeof(client));
+    register_client(&client, conn_addr, conn_addr_len, socket);
 
-    handle_connection(&client);
+    printf("Client %s connected\n", inet_ntoa(client->addr.sin_addr));
+
+    handle_connection(client);
   }
 
-  close(client.socket);
   free(ip);
   return 0;
 }
@@ -110,7 +121,7 @@ int register_server(server *server, char *ip, int port) {
     free(ip);
     return 5;
   }
-  
+
   return 0;
 }
 
