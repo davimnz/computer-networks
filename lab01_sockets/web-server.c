@@ -74,12 +74,12 @@ int main(int argc, char **argv)
       continue;
     }
 
-    client *client = malloc(sizeof(client));
-    register_client(&client, conn_addr, conn_addr_len, socket);
+    client *conn = malloc(sizeof(client));
+    register_client(&conn, conn_addr, conn_addr_len, socket);
 
-    printf("Client %s connected\n", inet_ntoa(client->addr.sin_addr));
+    printf("Client %s connected\n", inet_ntoa(conn->addr.sin_addr));
 
-    handle_connection(client);
+    handle_connection(conn);
   }
 
   free(ip);
