@@ -7,13 +7,17 @@ OBJDIR=obj
 
 all: server client
 
-server: server.o common.o
-	$(CC) $(CFLAGS) $(OBJDIR)/server.o $(OBJDIR)/common.o  -o $(BINDIR)/server
+server: mkdirs server.o connection.o common.o
+	$(CC) $(CFLAGS) $(OBJDIR)/server.o $(OBJDIR)/connection.o $(OBJDIR)/common.o  -o $(BINDIR)/server
 
 server.o: server/server.c common/common.h
 	$(CC) $(CFLAGS) -c server/server.c -o $(OBJDIR)/server.o
 
-client: client.o common.o request.o
+connection.o: server/connection.c server/connection.h
+	$(CC) $(CFLAGS) -c server/connection.c -o $(OBJDIR)/connection.o
+
+
+client: mkdirs client.o common.o request.o
 	$(CC) $(CFLAGS) $(OBJDIR)/client.o $(OBJDIR)/common.o $(OBJDIR)/request.o  -o $(BINDIR)/client
 
 client.o: client/client.c common/common.h common/request.h
@@ -26,6 +30,8 @@ common.o: common/common.c common/common.h
 request.o: common/request.c common/request.h
 	$(CC) $(CFLAGS) -c common/request.c -o $(OBJDIR)/request.o
 
+mkdirs:
+	@mkdir -p $(OBJDIR) $(BINDIR)
 
 clean:
 	$(RM) $(BINDIR)/* $(OBJDIR)/*
