@@ -1,5 +1,7 @@
 *.o
 tmp
-web-client
-web-server
 .vscode
+
+# Object and binaries
+obj
+bin

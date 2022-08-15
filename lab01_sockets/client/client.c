@@ -8,8 +8,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "./common/request.h"
-#include "./common/common.h"
+#include "../common/request.h"
+#include "../common/common.h"
 
 void parse_url(char*, char**, char**, char**);
 

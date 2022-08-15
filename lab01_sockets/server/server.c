@@ -11,7 +11,7 @@
 #include <stdbool.h>
 #include <pthread.h>
 
-#include "./common/common.h"
+#include "../common/common.h"
 
 struct server {
   struct sockaddr_in addr;
