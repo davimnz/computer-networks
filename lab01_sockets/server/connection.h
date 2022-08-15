@@ -29,4 +29,6 @@ connection *accept_client_connection(int server_socket);
 
 void *handle_connection(void *client);
 
+int close_connection(connection *client);
+
 #endif

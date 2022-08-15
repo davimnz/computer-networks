@@ -62,9 +62,9 @@ connection *accept_client_connection(int server_socket)
   return client;
 }
 
-void *handle_connection(void *ptr)
+void *handle_connection(void *conn)
 {
-  connection *client = (connection *)ptr;
+  connection *client = (connection *)conn;
 
   printf("Client %s connected\n", inet_ntoa(client->addr.sin_addr));
 
@@ -77,12 +77,11 @@ void *handle_connection(void *ptr)
     if (recv(client->socket, buffer, 1024, 0) == -1)
     {
       perror("recv");
-      return NULL;
     }
 
     if (strncmp("close", buffer, 5) == 0)
     {
-      close(client->socket);
+      close_connection(client);
       return NULL;
     }
 
@@ -91,7 +90,20 @@ void *handle_connection(void *ptr)
     if (send(client->socket, buffer, 1024, 0) == -1)
     {
       perror("send");
-      return NULL;
     }
   }
+}
+
+int close_connection(connection *client)
+{
+  int status = close(client->socket);
+  if (status != 0)
+  {
+    perror("close");
+    return status;
+  }
+
+  free((void *)client);
+
+  return 0;
 }
