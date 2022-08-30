@@ -11,6 +11,6 @@
 #include <stdio.h>
 #include <string.h>
 
-int get_ip_from_hostname(char *, char **);
+int getIpFromHostname(char *, char **);
 
 #endif
