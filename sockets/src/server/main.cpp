@@ -8,20 +8,20 @@ int main(int argc, char **argv)
 
   Server server(args.ip, args.port, args.filesPath);
 
-  server.Configure();
-  server.Listen();
+  server.configure();
+  server.listen();
 
   while (true)
   {
-    int connection = server.AcceptConnection();
+    int connection = server.acceptConnection();
 
-    std::thread connection_thread(Server::HandleConnection, connection);
+    std::thread connection_thread(Server::handleConnection, connection);
 
     connection_thread.detach();
   }
 
   // Close the connections
-  server.Close();
+  server.close();
 
   return 0;
 }

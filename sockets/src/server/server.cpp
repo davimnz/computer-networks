@@ -7,11 +7,11 @@ Server::Server(char *ip, int port, char *filesPath)
   this->filesPath = filesPath;
 }
 
-void Server::Configure()
+void Server::configure()
 {
   // Create a socket (IPv4, TCP)
-  socketfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (socketfd == -1)
+  socket = ::socket(AF_INET, SOCK_STREAM, 0);
+  if (socket == -1)
   {
     std::cout << "Failed to create socket. errno: " << errno << std::endl;
     exit(EXIT_FAILURE);
@@ -23,34 +23,34 @@ void Server::Configure()
 
   // Allow reuse address
   int yes = 1;
-  if (setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
+  if (setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
   {
     std::cout << "Failed to set sockopt. errno: " << errno << std::endl;
     exit(EXIT_FAILURE);
   }
 
-  if (bind(this->socketfd, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) < 0)
+  if (bind(this->socket, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) < 0)
   {
     std::cout << "Failed to bind to port. errno: " << errno << std::endl;
     exit(EXIT_FAILURE);
   }
 }
 
-void Server::Listen()
+void Server::listen()
 {
   // Start listening. Hold at most 10 connections in the queue
-  if (listen(socketfd, 10) < 0)
+  if (::listen(socket, 10) < 0)
   {
     std::cout << "Failed to listen on socket. errno: " << errno << std::endl;
     exit(EXIT_FAILURE);
   }
 }
 
-int Server::AcceptConnection()
+int Server::acceptConnection()
 {
   // Grab a connection from the queue
   auto addrlen = sizeof(sockaddr);
-  int connection = accept(socketfd, (struct sockaddr *)&sockaddr, (socklen_t *)&addrlen);
+  int connection = accept(socket, (struct sockaddr *)&sockaddr, (socklen_t *)&addrlen);
   if (connection < 0)
   {
     std::cout << "Failed to grab connection. errno: " << errno << std::endl;
@@ -60,7 +60,7 @@ int Server::AcceptConnection()
   return connection;
 }
 
-void Server::HandleConnection(int connection)
+void Server::handleConnection(int connection)
 {
   char buffer[1024];
 
@@ -75,7 +75,7 @@ void Server::HandleConnection(int connection)
 
     if (strncmp("close", buffer, 5) == 0)
     {
-      close(connection);
+      ::close(connection);
       break;
     }
 
@@ -88,7 +88,7 @@ void Server::HandleConnection(int connection)
   }
 }
 
-void Server::Close()
+void Server::close()
 {
-  close(socketfd);
+  ::close(socket);
 }

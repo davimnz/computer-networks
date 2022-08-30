@@ -25,14 +25,14 @@ public:
 
   struct sockaddr_in sockaddr;
   socklen_t addressLength;
-  int socketfd;
+  int socket;
 
   Server(char *ip, int port, char *filesPath);
-  void Configure();
-  void Listen();
-  int AcceptConnection();
-  static void HandleConnection(int);
-  void Close();
+  void configure();
+  void listen();
+  int acceptConnection();
+  static void handleConnection(int);
+  void close();
 };
 
 #endif
