@@ -60,7 +60,7 @@ int Server::acceptConnection()
   return connection;
 }
 
-void Server::handleConnection(int connection)
+void Server::handleConnection(int connection, std::string filesPath)
 {
   char buffer[1024];
 
@@ -73,19 +73,76 @@ void Server::handleConnection(int connection)
       perror("recv");
     }
 
-    if (strncmp("close", buffer, 5) == 0)
+    std::string request = buffer;
+
+    std::string filename = parseRequest(request);
+
+    std::string file;
+    std::string status;
+
+    if (handleRequest(filesPath, filename, &file, &status) != 0)
     {
-      ::close(connection);
       break;
     }
 
-    std::cout << buffer;
+    std::string response = composeResponse(status, file, file.length());
 
-    if (send(connection, buffer, 1024, 0) == -1)
+    if (send(connection, response.c_str(), response.size(), 0) == -1)
     {
       perror("send");
     }
   }
+}
+
+std::string parseRequest(std::string req)
+{
+  size_t startPosition = req.find("/") + 1;
+  size_t endPosition = req.find("HTTP") - 1;
+
+  std::string name = req.substr(startPosition, endPosition - startPosition);
+
+  if (name.empty())
+  {
+    name = "index";
+  }
+
+  std::stringstream filename;
+  filename << name << ".html";
+
+  return filename.str();
+}
+
+int handleRequest(std::string filesPath, std::string filename, std::string *file, std::string *status)
+{
+  std::ifstream ifs(filesPath + "/" + filename);
+
+  if (filename.compare("404.html") == 0 || !ifs.good())
+  {
+    ifs.close();
+    ifs.open(filesPath + "/" + "404.html");
+
+    *status = "HTTP/1.1 404 NOT FOUND";
+  }
+  else
+  {
+    *status = "HTTP/1.1 200 OK";
+  }
+
+  std::stringstream content;
+  content << ifs.rdbuf();
+
+  *file = content.str();
+  ifs.close();
+
+  return 0;
+}
+
+std::string composeResponse(std::string status, std::string file, int file_length)
+{
+  std::stringstream response;
+  response << status << "\r\nContent-Length: " << file_length << "\r\n\r\n"
+           << file;
+  return response.str();
 }
 
 void Server::close()

@@ -15,6 +15,12 @@
 #include <fcntl.h>
 #include <stdbool.h>
 #include <thread>
+#include <string>
+#include <sstream>
+#include <iostream>
+#include <fstream>
+#include <chrono>
+#include <thread>
 
 class Server
 {
@@ -31,8 +37,12 @@ public:
   void configure();
   void listen();
   int acceptConnection();
-  static void handleConnection(int);
+  static void handleConnection(int, std::string);
   void close();
 };
+
+std::string parseRequest(std::string);
+int handleRequest(std::string, std::string, std::string *, std::string *);
+std::string composeResponse(std::string, std::string, int);
 
 #endif
