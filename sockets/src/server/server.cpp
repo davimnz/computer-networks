@@ -114,6 +114,12 @@ std::string parseRequest(std::string req)
 
 int handleRequest(std::string filesPath, std::string filename, std::string *file, std::string *status)
 {
+  if (filename.compare("sleep.html") == 0)
+  {
+    filename = "index.html";  
+    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+  }
+
   std::ifstream ifs(filesPath + "/" + filename);
 
   if (filename.compare("404.html") == 0 || !ifs.good())
