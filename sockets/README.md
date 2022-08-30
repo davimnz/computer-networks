@@ -8,13 +8,13 @@ The binary files are in the **/bin** directory.
 
 Run the server binary from the root directory
 
-```
+```bash
 ./bin/server [hostname] [port] [server-files-directory]
 ```
 
 Example:
 
-```
+```bash
 ./bin/server localhost 8080 views
 ```
 
