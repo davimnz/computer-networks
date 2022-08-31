@@ -1,24 +1,12 @@
 #include "parser.h"
 
-int parseArguments(int argc, char **argv, struct Arguments *args)
+struct Arguments parseArguments(int argc, char **argv)
 {
-  if (argc != 4)
-  {
-    fprintf(stderr, "Usage: server [hostname] [port] [path-to-files]\n");
-    return 1;
-  }
+  struct Arguments args;
 
-  args->hostname = argv[1];
-  args->port = atoi(argv[2]);
-  args->filesPath = argv[3];
+  args.hostname = argc > 1 ? argv[1] : (char *)"localhost";
+  args.port = argc > 2 ? atoi(argv[2]) : 8080;
+  args.filesPath = argc > 3 ? argv[3] : (char *)"views";
 
-  char *ip;
-  if (getIpFromHostname(args->hostname, &ip) != 0)
-  {
-    return 2;
-  }
-
-  args->ip = ip;
-
-  return 0;
+  return args;
 }

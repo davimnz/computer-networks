@@ -3,10 +3,9 @@
 
 int main(int argc, char **argv)
 {
-  struct Arguments args;
-  parseArguments(argc, argv, &args);
+  struct Arguments args = parseArguments(argc, argv);
 
-  Server server(args.hostname, args.ip, args.port, args.filesPath);
+  Server server(args.hostname, args.port, args.filesPath);
 
   server.configure();
   server.listen();
@@ -20,7 +19,6 @@ int main(int argc, char **argv)
     connectionThread.detach();
   }
 
-  // Close the connections
   server.close();
 
   return 0;

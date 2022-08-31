@@ -22,6 +22,8 @@
 #include <chrono>
 #include <thread>
 
+#include "../common/common.h"
+
 class Server
 {
 public:
@@ -34,7 +36,7 @@ public:
   socklen_t addressLength;
   int socket;
 
-  Server(std::string, std::string, int, std::string);
+  Server(char *, int, char *);
   void configure();
   void listen();
   int acceptConnection();

@@ -12,9 +12,8 @@ struct Arguments
   char *hostname;
   int port;
   char *filesPath;
-  char *ip;
 };
 
-int parseArguments(int argc, char **argv, struct Arguments *args);
+struct Arguments parseArguments(int argc, char **argv);
 
 #endif

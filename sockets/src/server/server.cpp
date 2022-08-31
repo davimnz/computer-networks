@@ -1,7 +1,10 @@
 #include "server.h"
 
-Server::Server(std::string hostname, std::string ip, int port, std::string filesPath)
+Server::Server(char *hostname, int port, char *filesPath)
 {
+  char *ip;
+  getIpFromHostname(hostname, &ip);
+
   this->hostname = hostname;
   this->ip = ip;
   this->port = port;
@@ -45,6 +48,8 @@ void Server::listen()
     std::cout << "Failed to listen on socket. errno: " << errno << std::endl;
     exit(EXIT_FAILURE);
   }
+
+  std::cout << "Listening on " << this->hostname << ":" << this->port << std::endl;
 }
 
 int Server::acceptConnection()
@@ -117,7 +122,7 @@ int handleRequest(std::string filesPath, std::string filename, std::string *file
 {
   if (filename.compare("sleep.html") == 0)
   {
-    filename = "index.html";  
+    filename = "index.html";
     std::this_thread::sleep_for(std::chrono::milliseconds(5000));
   }
 
