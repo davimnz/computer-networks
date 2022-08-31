@@ -44,8 +44,8 @@ public:
   void close();
 };
 
-std::string parseRequest(std::string);
-int handleRequest(std::string, std::string, std::string *, std::string *);
-std::string composeResponse(std::string, std::string, int);
+std::string parseRequest(std::string &);
+void handleRequest(std::string &, std::string &, std::string &, std::string &);
+std::string composeResponse(std::string &, std::string &, int);
 
 #endif

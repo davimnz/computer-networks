@@ -83,10 +83,7 @@ void Server::handleConnection(int connection, std::string filesPath)
     std::string file;
     std::string status;
 
-    if (handleRequest(filesPath, filename, &file, &status) != 0)
-    {
-      break;
-    }
+    handleRequest(filesPath, filename, file, status);
 
     std::string response = composeResponse(status, file, file.length());
 
@@ -97,7 +94,7 @@ void Server::handleConnection(int connection, std::string filesPath)
   }
 }
 
-std::string parseRequest(std::string req)
+std::string parseRequest(std::string &req)
 {
   size_t startPosition = req.find("/") + 1;
   size_t endPosition = req.find("HTTP") - 1;
@@ -115,7 +112,7 @@ std::string parseRequest(std::string req)
   return filename.str();
 }
 
-int handleRequest(std::string filesPath, std::string filename, std::string *file, std::string *status)
+void handleRequest(std::string &filesPath, std::string &filename, std::string &file, std::string &status)
 {
   if (filename.compare("sleep.html") == 0)
   {
@@ -130,23 +127,21 @@ int handleRequest(std::string filesPath, std::string filename, std::string *file
     ifs.close();
     ifs.open(filesPath + "/" + "404.html");
 
-    *status = "HTTP/1.1 404 NOT FOUND";
+    status = "HTTP/1.1 404 NOT FOUND";
   }
   else
   {
-    *status = "HTTP/1.1 200 OK";
+    status = "HTTP/1.1 200 OK";
   }
 
   std::stringstream content;
   content << ifs.rdbuf();
 
-  *file = content.str();
+  file = content.str();
   ifs.close();
-
-  return 0;
 }
 
-std::string composeResponse(std::string status, std::string file, int file_length)
+std::string composeResponse(std::string &status, std::string &file, int file_length)
 {
   std::stringstream response;
   response << status << "\r\nContent-Length: " << file_length << "\r\n\r\n"
