@@ -13,5 +13,6 @@
 #include <string>
 
 int getIpFromHostname(char *, char **);
+std::string hostToIp(const std::string&);
 
 #endif

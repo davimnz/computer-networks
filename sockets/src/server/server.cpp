@@ -2,11 +2,8 @@
 
 Server::Server(char *hostname, int port, char *filesPath)
 {
-  char *ip;
-  getIpFromHostname(hostname, &ip);
-
   this->hostname = hostname;
-  this->ip = ip;
+  this->ip = hostToIp(hostname);
   this->port = port;
   this->filesPath = filesPath;
 }
