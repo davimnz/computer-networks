@@ -6,7 +6,7 @@ int main(int argc, char **argv)
   struct Arguments args;
   parseArguments(argc, argv, &args);
 
-  Server server(args.ip, args.port, args.filesPath);
+  Server server(args.hostname, args.ip, args.port, args.filesPath);
 
   server.configure();
   server.listen();

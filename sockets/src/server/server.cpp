@@ -1,7 +1,8 @@
 #include "server.h"
 
-Server::Server(char *ip, int port, char *filesPath)
+Server::Server(std::string hostname, std::string ip, int port, std::string filesPath)
 {
+  this->hostname = hostname;
   this->ip = ip;
   this->port = port;
   this->filesPath = filesPath;

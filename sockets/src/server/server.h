@@ -25,15 +25,16 @@
 class Server
 {
 public:
-  char *ip;
+  std::string hostname;
+  std::string ip;
   int port;
-  char *filesPath;
+  std::string filesPath;
 
   struct sockaddr_in sockaddr;
   socklen_t addressLength;
   int socket;
 
-  Server(char *ip, int port, char *filesPath);
+  Server(std::string, std::string, int, std::string);
   void configure();
   void listen();
   int acceptConnection();
