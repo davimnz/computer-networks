@@ -31,6 +31,16 @@ std::string hostToIp(const std::string &host)
   {
     exit(EXIT_FAILURE);
   }
-  
+
   return std::string(inet_ntoa(**(in_addr **)hostname->h_addr_list));
+}
+
+std::string httpResponseToString(HTTPResponse response)
+{
+  std::stringstream responseSS;
+  responseSS << response.protocol + " " << response.code + " " << response.status + "\r\n"
+             << "Content-Length: " << response.body.size() << "\r\n\r\n"
+             << response.body;
+
+  return responseSS.str();
 }

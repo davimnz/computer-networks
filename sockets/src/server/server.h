@@ -40,12 +40,11 @@ public:
   void configure();
   void listen();
   int acceptConnection();
-  static void handleConnection(int, std::string);
+  static void handleConnection(int, Server);
   void close();
 };
 
-std::string parseRequest(std::string &);
-void handleRequest(std::string &, std::string &, std::string &, std::string &);
-std::string composeResponse(std::string &, std::string &, int);
+HTTPRequest parseRequest(std::string &);
+HTTPResponse handleRequest(HTTPRequest &, std::string);
 
 #endif

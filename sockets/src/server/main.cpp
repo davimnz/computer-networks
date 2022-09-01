@@ -14,7 +14,7 @@ int main(int argc, char **argv)
   {
     int connection = server.acceptConnection();
 
-    std::thread connectionThread(Server::handleConnection, connection, server.filesPath);
+    std::thread connectionThread(Server::handleConnection, connection, server);
 
     connectionThread.detach();
   }

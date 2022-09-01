@@ -63,7 +63,7 @@ int Server::acceptConnection()
   return connection;
 }
 
-void Server::handleConnection(int connection, std::string filesPath)
+void Server::handleConnection(int connection, Server server)
 {
   char buffer[1024];
 
@@ -76,77 +76,89 @@ void Server::handleConnection(int connection, std::string filesPath)
       perror("recv");
     }
 
-    std::string request = buffer;
+    std::string buff = buffer;
 
-    std::string filename = parseRequest(request);
+    HTTPRequest request = parseRequest(buff);
 
-    std::string file;
-    std::string status;
+    HTTPResponse response = handleRequest(request, server.filesPath);
 
-    handleRequest(filesPath, filename, file, status);
+    std::string responseString = httpResponseToString(response);
 
-    std::string response = composeResponse(status, file, file.length());
-
-    if (send(connection, response.c_str(), response.size(), 0) == -1)
+    if (send(connection, responseString.c_str(), responseString.size(), 0) == -1)
     {
       perror("send");
     }
   }
 }
 
-std::string parseRequest(std::string &req)
+HTTPRequest parseRequest(std::string &req)
 {
-  size_t startPosition = req.find("/") + 1;
-  size_t endPosition = req.find("HTTP") - 1;
+  size_t methodStartPosition = 0;
+  size_t methodEndPosition = req.find("/") - 1;
+  std::string method = req.substr(methodStartPosition, methodEndPosition - methodStartPosition);
+  std::cout << "method: " << method << std::endl;
 
-  std::string name = req.substr(startPosition, endPosition - startPosition);
+  size_t routeStartPosition = req.find("/");
+  size_t routeEndPosition = req.find("HTTP") - 1;
+  std::string route = req.substr(routeStartPosition, routeEndPosition - routeStartPosition);
+  std::cout << "route: " << route << std::endl;
 
-  if (name.empty())
-  {
-    name = "index";
-  }
+  size_t protocolStartPosition = req.find("HTTP");
+  size_t protocolEndPosition = req.find("\r\n");
+  std::string protocol = req.substr(protocolStartPosition, protocolEndPosition - protocolStartPosition);
+  std::cout << "protocol: " << protocol << std::endl;
 
-  std::stringstream filename;
-  filename << name << ".html";
+  HTTPRequest request = {
+    method,
+    route,
+    protocol,
+  };
 
-  return filename.str();
+  return request;
 }
 
-void handleRequest(std::string &filesPath, std::string &filename, std::string &file, std::string &status)
+HTTPResponse handleRequest(HTTPRequest &request, std::string filesPath)
 {
-  if (filename.compare("sleep.html") == 0)
+  HTTPResponse response = {
+    "HTTP/1.1",
+    200,
+    "OK"
+  };
+
+  std::string filePath;
+
+  if (request.route.compare("/") == 0)
   {
-    filename = "index.html";
-    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+    filePath = filesPath + "/index.html";
   }
-
-  std::ifstream ifs(filesPath + "/" + filename);
-
-  if (filename.compare("404.html") == 0 || !ifs.good())
+  else if (request.route.compare("/sleep") == 0)
   {
-    ifs.close();
-    ifs.open(filesPath + "/" + "404.html");
-
-    status = "HTTP/1.1 404 NOT FOUND";
+    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+    filePath = filesPath + "/index.html";
   }
   else
   {
-    status = "HTTP/1.1 200 OK";
+    filePath = filesPath + request.route + ".html";
+  }
+
+  std::ifstream ifs(filePath);
+
+  if (!ifs.good())
+  {
+    ifs.close();
+    ifs.open(filesPath + "/404.html");
+
+    response.code = 404;
+    response.status = "NOT FOUND";
   }
 
   std::stringstream content;
   content << ifs.rdbuf();
 
-  file = content.str();
+  response.body = content.str();
   ifs.close();
-}
 
-std::string composeResponse(std::string &status, std::string &file, int file_length)
-{
-  std::stringstream response;
-  response << status << "\r\nContent-Length: " << file_length << "\r\n\r\n"
-           << file;
-  return response.str();
+  return response;
 }
 
 void Server::close()
