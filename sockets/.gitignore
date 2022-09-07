@@ -1,0 +1,6 @@
+.vscode
+
+# Object and binaries
+obj
+bin
+*.o
