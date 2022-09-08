@@ -8,17 +8,14 @@ BINDIR = bin
 all: mkdirs server client
 
 # server
-server: server_main.o server_class.o server_parser.o common.o
-	$(CC) $(CFLAGS) -o $(BINDIR)/server $(OBJDIR)/server_main.o $(OBJDIR)/server_class.o $(OBJDIR)/server_parser.o $(OBJDIR)/common.o
+server: server_main.o server_class.o common.o
+	$(CC) $(CFLAGS) -o $(BINDIR)/server $(OBJDIR)/server_main.o $(OBJDIR)/server_class.o $(OBJDIR)/common.o
 
 server_main.o: $(SRCDIR)/server/main.cpp
 	$(CC) $(CFLAGS) -o $(OBJDIR)/server_main.o -c $(SRCDIR)/server/main.cpp
 
 server_class.o: $(SRCDIR)/server/server.cpp $(SRCDIR)/server/server.h 
 	$(CC) $(CFLAGS) -o $(OBJDIR)/server_class.o -c $(SRCDIR)/server/server.cpp
-
-server_parser.o: common.o $(SRCDIR)/server/parser.cpp $(SRCDIR)/server/parser.h 
-	$(CC) $(CFLAGS) -o $(OBJDIR)/server_parser.o -c $(SRCDIR)/server/parser.cpp
 
 
 # client
@@ -30,7 +27,6 @@ client_main.o: $(SRCDIR)/client/main.cpp
 
 client_class.o: $(SRCDIR)/client/client.cpp $(SRCDIR)/client/client.h 
 	$(CC) $(CFLAGS) -o $(OBJDIR)/client_class.o -c $(SRCDIR)/client/client.cpp
-
 
 # common
 common.o: $(SRCDIR)/common/common.cpp $(SRCDIR)/common/common.h

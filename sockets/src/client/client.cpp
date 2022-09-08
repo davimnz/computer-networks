@@ -1,6 +1,6 @@
 #include "client.h"
 
-void Client::configure(char *hostname, int port)
+void Client::configure(std::string hostname, int port)
 {
   std::string ip = hostToIp(hostname);
 
@@ -31,11 +31,11 @@ void Client::connect()
   }
 }
 
-void Client::request()
+HTTPResponse Client::makeRequest(HTTPRequest request)
 {
-  char hello[] = "GET / HTTP/1.1";
+  std::string requestString = httpRequestToString(request);
 
-  send(socket, hello, strlen(hello), 0);
+  send(socket, requestString.c_str(), requestString.size(), 0);
 
   char buffer[1024];
   memset(buffer, '\0', sizeof(buffer));
@@ -45,7 +45,11 @@ void Client::request()
     perror("recv");
   }
 
-  std::cout << buffer << std::endl;
+  std::string responseString = buffer;
+
+  auto response = parseResponse(responseString);
+
+  return response;
 }
 
 void Client::close()

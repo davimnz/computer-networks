@@ -41,10 +41,9 @@ public:
   void listen();
   int acceptConnection();
   static void handleConnection(int, Server);
+  static HTTPResponse handleRequest(HTTPRequest &, std::string);
   void close();
 };
 
-HTTPRequest parseRequest(std::string &);
-HTTPResponse handleRequest(HTTPRequest &, std::string);
 
 #endif

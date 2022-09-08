@@ -12,23 +12,39 @@
 #include <string.h>
 #include <string>
 #include <sstream>
+#include <iostream>
 
 int getIpFromHostname(char *, char **);
-std::string hostToIp(const std::string&);
+std::string hostToIp(const std::string &);
 
-typedef struct HTTPRequest {
+typedef struct Url
+{
+  std::string hostname;
+  int port;
+  std::string route;
+} Url;
+
+Url parseUrl(std::string &);
+
+typedef struct HTTPRequest
+{
   std::string method;
   std::string route;
   std::string protocol;
 } HTTPRequest;
 
-typedef struct HTTPResponse {
+typedef struct HTTPResponse
+{
   std::string protocol;
   int code;
   std::string status;
+  int contentLength;
   std::string body;
 } HTTPResponse;
 
+std::string httpRequestToString(HTTPRequest);
+HTTPRequest parseRequest(std::string &);
 std::string httpResponseToString(HTTPResponse);
+HTTPResponse parseResponse(std::string &);
 
 #endif

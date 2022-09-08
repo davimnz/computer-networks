@@ -30,9 +30,9 @@ public:
   struct sockaddr_in sockaddr;
   int socket;
 
-  void configure(char *, int);
+  void configure(std::string, int);
   void connect();
-  void request();
+  HTTPResponse makeRequest(HTTPRequest);
   void close();
 };
 

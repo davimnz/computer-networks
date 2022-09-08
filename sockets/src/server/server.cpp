@@ -76,9 +76,13 @@ void Server::handleConnection(int connection, Server server)
 
   std::string buff = buffer;
 
-  HTTPRequest request = parseRequest(buff);
+  auto request = parseRequest(buff);
 
-  HTTPResponse response = handleRequest(request, server.filesPath);
+  std::cout << "Request: " << request.method << " " << request.route << std::endl;
+
+  auto response = Server::handleRequest(request, server.filesPath);
+
+  std::cout << "Response: " << response.code << " " << response.status << std::endl;
 
   std::string responseString = httpResponseToString(response);
 
@@ -88,38 +92,13 @@ void Server::handleConnection(int connection, Server server)
   }
 }
 
-HTTPRequest parseRequest(std::string &req)
-{
-  size_t methodStartPosition = 0;
-  size_t methodEndPosition = req.find("/") - 1;
-  std::string method = req.substr(methodStartPosition, methodEndPosition - methodStartPosition);
-  std::cout << "method: " << method << std::endl;
-
-  size_t routeStartPosition = req.find("/");
-  size_t routeEndPosition = req.find("HTTP") - 1;
-  std::string route = req.substr(routeStartPosition, routeEndPosition - routeStartPosition);
-  std::cout << "route: " << route << std::endl;
-
-  size_t protocolStartPosition = req.find("HTTP");
-  size_t protocolEndPosition = req.find("\r\n");
-  std::string protocol = req.substr(protocolStartPosition, protocolEndPosition - protocolStartPosition);
-  std::cout << "protocol: " << protocol << std::endl;
-
-  HTTPRequest request = {
-      method,
-      route,
-      protocol,
-  };
-
-  return request;
-}
-
-HTTPResponse handleRequest(HTTPRequest &request, std::string filesPath)
+HTTPResponse Server::handleRequest(HTTPRequest &request, std::string filesPath)
 {
   HTTPResponse response = {
       "HTTP/1.1",
       200,
-      "OK"};
+      "OK",
+  };
 
   std::string filePath;
 
@@ -152,6 +131,7 @@ HTTPResponse handleRequest(HTTPRequest &request, std::string filesPath)
   content << ifs.rdbuf();
 
   response.body = content.str();
+  response.contentLength = response.body.size();
   ifs.close();
 
   return response;

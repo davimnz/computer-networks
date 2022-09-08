@@ -1,11 +1,12 @@
-#include "parser.h"
 #include "server.h"
 
 int main(int argc, char **argv)
 {
-  struct Arguments args = parseArguments(argc, argv);
+  auto hostname = argc > 1 ? argv[1] : (char *)"localhost";
+  auto port = argc > 2 ? atoi(argv[2]) : 8080;
+  auto filesPath = argc > 3 ? argv[3] : (char *)"views";
 
-  Server server(args.hostname, args.port, args.filesPath);
+  Server server(hostname, port, filesPath);
 
   server.configure();
   server.listen();
