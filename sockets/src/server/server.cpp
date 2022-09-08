@@ -67,27 +67,24 @@ void Server::handleConnection(int connection, Server server)
 {
   char buffer[1024];
 
-  while (true)
+  memset(buffer, '\0', sizeof(buffer));
+
+  if (recv(connection, buffer, 1024, 0) == -1)
   {
-    memset(buffer, '\0', sizeof(buffer));
+    perror("recv");
+  }
 
-    if (recv(connection, buffer, 1024, 0) == -1)
-    {
-      perror("recv");
-    }
+  std::string buff = buffer;
 
-    std::string buff = buffer;
+  HTTPRequest request = parseRequest(buff);
 
-    HTTPRequest request = parseRequest(buff);
+  HTTPResponse response = handleRequest(request, server.filesPath);
 
-    HTTPResponse response = handleRequest(request, server.filesPath);
+  std::string responseString = httpResponseToString(response);
 
-    std::string responseString = httpResponseToString(response);
-
-    if (send(connection, responseString.c_str(), responseString.size(), 0) == -1)
-    {
-      perror("send");
-    }
+  if (send(connection, responseString.c_str(), responseString.size(), 0) == -1)
+  {
+    perror("send");
   }
 }
 
@@ -109,9 +106,9 @@ HTTPRequest parseRequest(std::string &req)
   std::cout << "protocol: " << protocol << std::endl;
 
   HTTPRequest request = {
-    method,
-    route,
-    protocol,
+      method,
+      route,
+      protocol,
   };
 
   return request;
@@ -120,10 +117,9 @@ HTTPRequest parseRequest(std::string &req)
 HTTPResponse handleRequest(HTTPRequest &request, std::string filesPath)
 {
   HTTPResponse response = {
-    "HTTP/1.1",
-    200,
-    "OK"
-  };
+      "HTTP/1.1",
+      200,
+      "OK"};
 
   std::string filePath;
 
