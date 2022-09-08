@@ -1,9 +1,20 @@
-#include <string.h>
-#include <iostream>
-#include <stdio.h>
+#include "./client.h"
 
-int main()  {
-  std::cout << "/* message */" << std::endl;
+int main(int argc, char **argv)
+{
+  char hostname[] = "localhost";
+  int port = 8080;
+  char route[] = "/";
+  
+  Client client;
+  
+  client.configure(hostname, port);
+
+  client.connect();
+
+  client.request();
+
+  client.close();
 
   return 0;
 }

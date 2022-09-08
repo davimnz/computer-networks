@@ -22,11 +22,14 @@ server_parser.o: common.o $(SRCDIR)/server/parser.cpp $(SRCDIR)/server/parser.h
 
 
 # client
-client: client.o common.o
-	$(CC) $(CFLAGS) -o $(BINDIR)/client $(OBJDIR)/client.o $(OBJDIR)/common.o
+client: client_main.o client_class.o common.o
+	$(CC) $(CFLAGS) -o $(BINDIR)/client $(OBJDIR)/client_main.o $(OBJDIR)/client_class.o $(OBJDIR)/common.o
 
-client.o: $(SRCDIR)/client/main.cpp $(SRCDIR)/common/common.h
-	$(CC) $(CFLAGS) -o $(OBJDIR)/client.o -c $(SRCDIR)/client/main.cpp
+client_main.o: $(SRCDIR)/client/main.cpp
+	$(CC) $(CFLAGS) -o $(OBJDIR)/client_main.o -c $(SRCDIR)/client/main.cpp
+
+client_class.o: $(SRCDIR)/client/client.cpp $(SRCDIR)/client/client.h 
+	$(CC) $(CFLAGS) -o $(OBJDIR)/client_class.o -c $(SRCDIR)/client/client.cpp
 
 
 # common
