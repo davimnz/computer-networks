@@ -84,7 +84,7 @@ void Server::handleConnection(int connection, Server server)
 
   std::cout << "Response: " << response.code << " " << response.status << std::endl;
 
-  std::string responseString = httpResponseToString(response);
+  auto responseString = httpResponseToString(response);
 
   if (send(connection, responseString.c_str(), responseString.size(), 0) == -1)
   {
@@ -100,21 +100,23 @@ HTTPResponse Server::handleRequest(HTTPRequest &request, std::string filesPath)
       "OK",
   };
 
-  std::string filePath;
+  std::string fileName;
 
   if (request.route.compare("/") == 0)
   {
-    filePath = filesPath + "/index.html";
+    fileName = "index.html";
   }
   else if (request.route.compare("/sleep") == 0)
   {
     std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-    filePath = filesPath + "/index.html";
+    fileName = "index.html";
   }
   else
   {
-    filePath = filesPath + request.route + ".html";
+    fileName = request.route.substr(1) + ".html";
   }
+
+  std::string filePath = filesPath + "/" + fileName;
 
   std::ifstream ifs(filePath);
 
@@ -133,6 +135,9 @@ HTTPResponse Server::handleRequest(HTTPRequest &request, std::string filesPath)
   response.body = content.str();
   response.contentLength = response.body.size();
   ifs.close();
+
+  response.contentDisposition = "attachment; filename=\"" + fileName + "\"";
+  response.contentType = "text/html";
 
   return response;
 }

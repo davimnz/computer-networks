@@ -49,7 +49,30 @@ HTTPResponse Client::makeRequest(HTTPRequest request)
 
   auto response = parseResponse(responseString);
 
+  std::cout << "Response status: " << response.code << " " << response.status << std::endl;
+
   return response;
+}
+
+void Client::handleResponse(HTTPResponse response, std::string &storage)
+{
+  if (response.code != 200)
+  {
+    return;
+  }
+
+  std::string fileName = getFileNameFromContentDisposition(response.contentDisposition);
+
+  std::cout << "Saving file " << fileName << std::endl;
+
+  std::string path = storage + "/" + fileName;
+
+  std::ofstream file;
+  file.open(path);
+
+  file << response.body;
+
+  file.close();
 }
 
 void Client::close()

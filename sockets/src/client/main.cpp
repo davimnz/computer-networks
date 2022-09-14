@@ -2,6 +2,8 @@
 #include <fstream>
 #include "client.h"
 
+#define DEFAULT_ASSETS_FOLDER "recv"
+
 int main(int argc, char **argv)
 {
   int numUrls = argc - 1;
@@ -14,7 +16,7 @@ int main(int argc, char **argv)
   }
 
   Client client;
-  std::string storage = "recv";
+  std::string storage = DEFAULT_ASSETS_FOLDER;
 
   for (int i = 0; i < numUrls; i++)
   {
@@ -32,19 +34,7 @@ int main(int argc, char **argv)
 
     auto response = client.makeRequest(req);
 
-    std::cout << "Response status: " << response.code << " " << response.status << std::endl;
-
-    if (response.code == 200)
-    {
-      std::string path = storage + (url.route.compare("/") || url.route.compare("/sleep") ? "/index" : url.route) + ".html";
-
-      std::ofstream file;
-      file.open(path);
-
-      file << response.body;
-
-      file.close();
-    }
+    client.handleResponse(response, storage);
 
     client.close();
   }

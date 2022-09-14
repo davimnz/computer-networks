@@ -1,10 +1,12 @@
 #include "server.h"
 
+#define DEFAULT_ASSETS_FOLDER "views"
+
 int main(int argc, char **argv)
 {
-  auto hostname = argc > 1 ? argv[1] : (char *)"localhost";
-  auto port = argc > 2 ? atoi(argv[2]) : 8080;
-  auto filesPath = argc > 3 ? argv[3] : (char *)"views";
+  auto hostname = argc > 1 ? argv[1] : (char *)DEFAULT_HOSTNAME;
+  auto port = argc > 2 ? atoi(argv[2]) : DEFAULT_PORT;
+  auto filesPath = argc > 3 ? argv[3] : (char *)DEFAULT_ASSETS_FOLDER;
 
   Server server(hostname, port, filesPath);
 

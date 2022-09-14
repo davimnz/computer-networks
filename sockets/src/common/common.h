@@ -14,6 +14,9 @@
 #include <sstream>
 #include <iostream>
 
+#define DEFAULT_PORT 8080
+#define DEFAULT_HOSTNAME "localhost"
+
 int getIpFromHostname(char *, char **);
 std::string hostToIp(const std::string &);
 
@@ -39,9 +42,13 @@ typedef struct HTTPResponse
   int code;
   std::string status;
   int contentLength;
+  std::string contentDisposition;
+  std::string contentType;
   std::string body;
 } HTTPResponse;
 
+std::string getHeader(std::string, std::string &, size_t);
+std::string getFileNameFromContentDisposition(std::string &);
 std::string httpRequestToString(HTTPRequest);
 HTTPRequest parseRequest(std::string &);
 std::string httpResponseToString(HTTPResponse);

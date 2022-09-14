@@ -33,6 +33,7 @@ public:
   void configure(std::string, int);
   void connect();
   HTTPResponse makeRequest(HTTPRequest);
+  void handleResponse(HTTPResponse, std::string &);
   void close();
 };
 

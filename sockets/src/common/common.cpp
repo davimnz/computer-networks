@@ -26,7 +26,7 @@ int getIpFromHostname(char *hostname, char **ip)
 
 std::string hostToIp(const std::string &host)
 {
-  hostent *hostname = gethostbyname(host.c_str());
+  auto hostname = gethostbyname(host.c_str());
   if (!hostname)
   {
     exit(EXIT_FAILURE);
@@ -50,7 +50,7 @@ Url parseUrl(std::string &url)
 
   std::string hostname = hasPortSpecified ? host.substr(0, colonPosition) : host;
 
-  std::string port = hasPortSpecified ? host.substr(colonPosition + 1) : "80";
+  std::string port = hasPortSpecified ? host.substr(colonPosition + 1) : std::to_string(DEFAULT_PORT);
 
   std::string route = isRootRoute ? "/" : url.substr(hostEndPosition);
 
@@ -59,6 +59,26 @@ Url parseUrl(std::string &url)
       atoi(port.c_str()),
       route,
   };
+}
+
+std::string getHeader(std::string headerName, std::string &content, size_t start)
+{
+  size_t headerNameSize = headerName.size();
+
+  size_t headerStartPosition = content.find(headerName, start) + headerNameSize + 1;
+  size_t headerEndPosition = content.find("\r\n", headerStartPosition);
+  std::string header = content.substr(headerStartPosition, headerEndPosition - headerStartPosition);
+
+  return header;
+}
+
+std::string getFileNameFromContentDisposition(std::string &contentDisposition)
+{
+  size_t fileNameStartPosition = contentDisposition.find("\"") + 1;
+  size_t fileNameEndPosition = contentDisposition.find("\"", fileNameStartPosition);
+  std::string fileName = contentDisposition.substr(fileNameStartPosition, fileNameEndPosition - fileNameStartPosition);
+
+  return fileName;
 }
 
 std::string httpRequestToString(HTTPRequest request)
@@ -94,7 +114,10 @@ std::string httpResponseToString(HTTPResponse response)
 {
   std::stringstream responseSS;
   responseSS << response.protocol + " " << response.code << " " << response.status + "\r\n"
-             << "Content-Length: " << response.contentLength << "\r\n\r\n"
+             << "Content-Length: " << response.contentLength << "\r\n"
+             << "Content-Disposition: " << response.contentDisposition << "\r\n"
+             << "Content-Type: " << response.contentType << "\r\n"
+             << "\r\n"
              << response.body;
 
   return responseSS.str();
@@ -114,18 +137,20 @@ HTTPResponse parseResponse(std::string &res)
   size_t statusEndPosition = res.find("\r\n", statusStartPosition);
   std::string status = res.substr(statusStartPosition, statusEndPosition - statusStartPosition);
 
-  size_t contentLengthStartPosition = res.find(":", statusEndPosition) + 1;
-  size_t contentLengthEndPosition = res.find("\r\n", contentLengthStartPosition);
-  std::string contentLength = res.substr(contentLengthStartPosition, contentLengthEndPosition - contentLengthStartPosition);
+  std::string contentLength = getHeader("Content-Length", res, statusEndPosition);
+  std::string contentDisposition = getHeader("Content-Disposition", res, statusEndPosition);
+  std::string contentType = getHeader("Content-Type", res, statusEndPosition);
 
-  size_t contentStartPosition = contentLengthEndPosition + 4;
-  std::string content = res.substr(contentStartPosition);
+  size_t bodyStartPosition = res.find("\r\n\r\n") + 4;
+  std::string body = res.substr(bodyStartPosition);
 
   return HTTPResponse{
       protocol,
       atoi(code.c_str()),
       status,
       atoi(contentLength.c_str()),
-      content,
+      contentDisposition,
+      contentType,
+      body,
   };
 }
