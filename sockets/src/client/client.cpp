@@ -33,6 +33,8 @@ void Client::connect()
 
 HTTPResponse Client::makeRequest(HTTPRequest request)
 {
+  std::cout << "Request: " << request.method + " " << request.route << std::endl;
+
   std::string requestString = httpRequestToString(request);
 
   send(socket, requestString.c_str(), requestString.size(), 0);
