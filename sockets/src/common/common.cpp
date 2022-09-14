@@ -74,7 +74,7 @@ std::string getHeader(std::string headerName, std::string &content, size_t start
 
 std::string getFileNameFromContentDisposition(std::string &contentDisposition)
 {
-  size_t fileNameStartPosition = contentDisposition.find("\"") + 1;
+  size_t fileNameStartPosition = contentDisposition.find("filename=\"") + 10;
   size_t fileNameEndPosition = contentDisposition.find("\"", fileNameStartPosition);
   std::string fileName = contentDisposition.substr(fileNameStartPosition, fileNameEndPosition - fileNameStartPosition);
 
@@ -114,9 +114,9 @@ std::string httpResponseToString(HTTPResponse response)
 {
   std::stringstream responseSS;
   responseSS << response.protocol + " " << response.code << " " << response.status + "\r\n"
-             << "Content-Length: " << response.contentLength << "\r\n"
-             << "Content-Disposition: " << response.contentDisposition << "\r\n"
-             << "Content-Type: " << response.contentType << "\r\n"
+             << CONTENT_LENGTH_HEADER << ": " << response.contentLength << "\r\n"
+             << CONTENT_DISPOSITION_HEADER << ": " << response.contentDisposition << "\r\n"
+             << CONTENT_TYPE_HEADER << ": " << response.contentType << "\r\n"
              << "\r\n"
              << response.body;
 
@@ -137,9 +137,9 @@ HTTPResponse parseResponse(std::string &res)
   size_t statusEndPosition = res.find("\r\n", statusStartPosition);
   std::string status = res.substr(statusStartPosition, statusEndPosition - statusStartPosition);
 
-  std::string contentLength = getHeader("Content-Length", res, statusEndPosition);
-  std::string contentDisposition = getHeader("Content-Disposition", res, statusEndPosition);
-  std::string contentType = getHeader("Content-Type", res, statusEndPosition);
+  std::string contentLength = getHeader(CONTENT_LENGTH_HEADER, res, statusEndPosition);
+  std::string contentDisposition = getHeader(CONTENT_DISPOSITION_HEADER, res, statusEndPosition);
+  std::string contentType = getHeader(CONTENT_TYPE_HEADER, res, statusEndPosition);
 
   size_t bodyStartPosition = res.find("\r\n\r\n") + 4;
   std::string body = res.substr(bodyStartPosition);

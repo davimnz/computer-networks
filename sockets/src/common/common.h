@@ -16,6 +16,22 @@
 
 #define DEFAULT_PORT 8080
 #define DEFAULT_HOSTNAME "localhost"
+#define HTTP_PROTOCOL "HTTP/1.0"
+
+#define OK_STATUS "OK"
+#define OK_CODE 200
+
+#define NOT_FOUND_STATUS "NOT FOUND"
+#define NOT_FOUND_CODE 404
+
+#define BAD_REQUEST_STATUS "BAD REQUEST"
+#define BAD_REQUEST_CODE 400
+
+#define GET_METHOD "GET"
+
+#define CONTENT_LENGTH_HEADER "Content-Length"
+#define CONTENT_DISPOSITION_HEADER "Content-Disposition"
+#define CONTENT_TYPE_HEADER "Content-Type"
 
 int getIpFromHostname(char *, char **);
 std::string hostToIp(const std::string &);

@@ -95,9 +95,9 @@ void Server::handleConnection(int connection, Server server)
 HTTPResponse Server::handleRequest(HTTPRequest &request, std::string filesPath)
 {
   HTTPResponse response = {
-      "HTTP/1.1",
-      200,
-      "OK",
+      HTTP_PROTOCOL,
+      OK_CODE,
+      OK_STATUS,
   };
 
   std::string fileName;
@@ -113,7 +113,7 @@ HTTPResponse Server::handleRequest(HTTPRequest &request, std::string filesPath)
   }
   else
   {
-    fileName = request.route.substr(1) + ".html";
+    fileName = request.route.substr(1);
   }
 
   std::string filePath = filesPath + "/" + fileName;
@@ -125,8 +125,8 @@ HTTPResponse Server::handleRequest(HTTPRequest &request, std::string filesPath)
     ifs.close();
     ifs.open(filesPath + "/404.html");
 
-    response.code = 404;
-    response.status = "NOT FOUND";
+    response.code = NOT_FOUND_CODE;
+    response.status = NOT_FOUND_STATUS;
   }
 
   std::stringstream content;
@@ -136,7 +136,7 @@ HTTPResponse Server::handleRequest(HTTPRequest &request, std::string filesPath)
   response.contentLength = response.body.size();
   ifs.close();
 
-  response.contentDisposition = "attachment; filename=\"" + fileName + "\"";
+  response.contentDisposition = "inline; filename=\"" + fileName + "\"";
   response.contentType = "text/html";
 
   return response;

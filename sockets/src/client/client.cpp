@@ -58,7 +58,7 @@ HTTPResponse Client::makeRequest(HTTPRequest request)
 
 void Client::handleResponse(HTTPResponse response, std::string &storage)
 {
-  if (response.code != 200)
+  if (response.code != OK_CODE)
   {
     return;
   }

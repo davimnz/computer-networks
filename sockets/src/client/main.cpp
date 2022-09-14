@@ -27,9 +27,9 @@ int main(int argc, char **argv)
     client.connect();
 
     HTTPRequest req = {
-        "GET",
+        GET_METHOD,
         url.route,
-        "HTTP/1.1",
+        HTTP_PROTOCOL,
     };
 
     auto response = client.makeRequest(req);
