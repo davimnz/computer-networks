@@ -1,5 +1,5 @@
-#ifndef SERVER_H
-#define SERVER_H
+#ifndef CLIENT_H
+#define CLIENT_H
 
 #include <iostream>
 #include <sys/types.h>
@@ -24,26 +24,17 @@
 
 #include "../common/common.h"
 
-class Server
+class Client
 {
 public:
-  std::string hostname;
-  std::string ip;
-  int port;
-  std::string filesPath;
-
   struct sockaddr_in sockaddr;
-  socklen_t addressLength;
   int socket;
 
-  Server(char *, int, char *);
-  void configure();
-  void listen();
-  int acceptConnection();
-  static void handleConnection(int, Server);
-  static HTTPResponse handleRequest(HTTPRequest &, std::string);
+  void configure(std::string, int);
+  void connect();
+  HTTPResponse makeRequest(HTTPRequest);
+  void handleResponse(HTTPResponse, std::string &);
   void close();
 };
-
 
 #endif

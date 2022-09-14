@@ -76,11 +76,15 @@ void Server::handleConnection(int connection, Server server)
 
   std::string buff = buffer;
 
-  HTTPRequest request = parseRequest(buff);
+  auto request = parseRequest(buff);
 
-  HTTPResponse response = handleRequest(request, server.filesPath);
+  std::cout << "Request: " << request.method << " " << request.route << std::endl;
 
-  std::string responseString = httpResponseToString(response);
+  auto response = Server::handleRequest(request, server.filesPath);
+
+  std::cout << "Response: " << response.code << " " << response.status << std::endl;
+
+  auto responseString = httpResponseToString(response);
 
   if (send(connection, responseString.c_str(), responseString.size(), 0) == -1)
   {
@@ -88,54 +92,31 @@ void Server::handleConnection(int connection, Server server)
   }
 }
 
-HTTPRequest parseRequest(std::string &req)
-{
-  size_t methodStartPosition = 0;
-  size_t methodEndPosition = req.find("/") - 1;
-  std::string method = req.substr(methodStartPosition, methodEndPosition - methodStartPosition);
-  std::cout << "method: " << method << std::endl;
-
-  size_t routeStartPosition = req.find("/");
-  size_t routeEndPosition = req.find("HTTP") - 1;
-  std::string route = req.substr(routeStartPosition, routeEndPosition - routeStartPosition);
-  std::cout << "route: " << route << std::endl;
-
-  size_t protocolStartPosition = req.find("HTTP");
-  size_t protocolEndPosition = req.find("\r\n");
-  std::string protocol = req.substr(protocolStartPosition, protocolEndPosition - protocolStartPosition);
-  std::cout << "protocol: " << protocol << std::endl;
-
-  HTTPRequest request = {
-      method,
-      route,
-      protocol,
-  };
-
-  return request;
-}
-
-HTTPResponse handleRequest(HTTPRequest &request, std::string filesPath)
+HTTPResponse Server::handleRequest(HTTPRequest &request, std::string filesPath)
 {
   HTTPResponse response = {
       "HTTP/1.1",
       200,
-      "OK"};
+      "OK",
+  };
 
-  std::string filePath;
+  std::string fileName;
 
   if (request.route.compare("/") == 0)
   {
-    filePath = filesPath + "/index.html";
+    fileName = "index.html";
   }
   else if (request.route.compare("/sleep") == 0)
   {
     std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-    filePath = filesPath + "/index.html";
+    fileName = "index.html";
   }
   else
   {
-    filePath = filesPath + request.route + ".html";
+    fileName = request.route.substr(1) + ".html";
   }
+
+  std::string filePath = filesPath + "/" + fileName;
 
   std::ifstream ifs(filePath);
 
@@ -152,7 +133,11 @@ HTTPResponse handleRequest(HTTPRequest &request, std::string filesPath)
   content << ifs.rdbuf();
 
   response.body = content.str();
+  response.contentLength = response.body.size();
   ifs.close();
+
+  response.contentDisposition = "attachment; filename=\"" + fileName + "\"";
+  response.contentType = "text/html";
 
   return response;
 }
