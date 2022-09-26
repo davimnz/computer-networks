@@ -84,7 +84,10 @@ std::string getFileNameFromContentDisposition(std::string &contentDisposition)
 std::string httpRequestToString(HTTPRequest request)
 {
   std::stringstream requestSS;
-  requestSS << request.method + " " << request.route + " " << request.protocol;
+  requestSS << request.method + " " << request.route + " " << request.protocol + "\r\n"
+            << HOST_HEADER << ": " << request.host << "\r\n"
+            << CONNECTION_HEADER << ": " << request.connection << "\r\n"
+            << "\r\n";
 
   return requestSS.str();
 }

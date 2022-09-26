@@ -14,8 +14,8 @@
 #include <sstream>
 #include <iostream>
 
-#define DEFAULT_PORT 8080
 #define DEFAULT_HOSTNAME "localhost"
+#define DEFAULT_PORT 80
 #define HTTP_PROTOCOL "HTTP/1.0"
 
 #define OK_STATUS "OK"
@@ -28,6 +28,10 @@
 #define BAD_REQUEST_CODE 400
 
 #define GET_METHOD "GET"
+
+#define HOST_HEADER "Host"
+#define CONNECTION_HEADER "Connection"
+#define DEFAULT_CONNECTION_HEADER "close"
 
 #define CONTENT_LENGTH_HEADER "Content-Length"
 #define CONTENT_DISPOSITION_HEADER "Content-Disposition"
@@ -50,6 +54,8 @@ typedef struct HTTPRequest
   std::string method;
   std::string route;
   std::string protocol;
+  std::string host;
+  std::string connection;
 } HTTPRequest;
 
 typedef struct HTTPResponse

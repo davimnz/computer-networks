@@ -30,6 +30,8 @@ int main(int argc, char **argv)
         GET_METHOD,
         url.route,
         HTTP_PROTOCOL,
+        url.hostname,
+        DEFAULT_CONNECTION_HEADER,
     };
 
     auto response = client.makeRequest(req);
