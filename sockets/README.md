@@ -4,6 +4,8 @@ First make sure to compile the project by running `make` at the root directory.
 
 The binary files are in the **/bin** directory.
 
+Create a **recv** directory to save the files that the client downloaded.
+
 ## Server
 
 Run the server binary from the root directory
@@ -36,4 +38,4 @@ Example:
 ./bin/client localhost:8080
 ```
 
-This will make a **GET** request to all the URLs specified and will save the objects received from them inside the `recv` directory. If making a request to the HOST=`localhost` make sure to first run the server binary and also to include de port as the default port set is `80`.
+This will make a **GET** request to all the URLs specified and will save the objects received from them inside the `recv` directory. If making a request to the HOST=`localhost` make sure to first run the server binary and also to include the port as the default port set is `80`.
