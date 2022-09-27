@@ -90,6 +90,8 @@ void Server::handleConnection(int connection, Server server)
   {
     perror("send");
   }
+
+  ::close(connection);
 }
 
 HTTPResponse Server::handleRequest(HTTPRequest &request, std::string filesPath)
