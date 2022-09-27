@@ -65,18 +65,9 @@ int Server::acceptConnection()
 
 void Server::handleConnection(int connection, Server server)
 {
-  char buffer[1024];
+  std::string requestString = readRequestFromSocket(connection);
 
-  memset(buffer, '\0', sizeof(buffer));
-
-  if (recv(connection, buffer, 1024, 0) == -1)
-  {
-    perror("recv");
-  }
-
-  std::string buff = buffer;
-
-  auto request = parseRequest(buff);
+  auto request = parseRequest(requestString);
 
   std::cout << "Request: " << request.method << " " << request.route << std::endl;
 
@@ -102,23 +93,19 @@ HTTPResponse Server::handleRequest(HTTPRequest &request, std::string filesPath)
       OK_STATUS,
   };
 
-  std::string fileName;
+  std::string relativePath = request.route;
 
   if (request.route.compare("/") == 0)
   {
-    fileName = "index.html";
+    relativePath = "/index.html";
   }
   else if (request.route.compare("/sleep") == 0)
   {
     std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-    fileName = "index.html";
-  }
-  else
-  {
-    fileName = request.route.substr(1);
+    relativePath = "/index.html";
   }
 
-  std::string filePath = filesPath + "/" + fileName;
+  std::string filePath = filesPath + relativePath;
 
   std::ifstream ifs(filePath);
 
@@ -138,7 +125,6 @@ HTTPResponse Server::handleRequest(HTTPRequest &request, std::string filesPath)
   response.contentLength = response.body.size();
   ifs.close();
 
-  response.contentDisposition = "inline; filename=\"" + fileName + "\"";
   response.contentType = "text/html";
 
   return response;

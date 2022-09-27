@@ -36,7 +36,9 @@ int main(int argc, char **argv)
 
     auto response = client.makeRequest(req);
 
-    client.handleResponse(response, storage);
+    std::string savePath = client.getSavePath(url.route, storage);
+
+    client.handleResponse(response, savePath);
 
     client.close();
   }

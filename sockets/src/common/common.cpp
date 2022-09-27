@@ -72,15 +72,6 @@ std::string getHeader(std::string headerName, std::string &content, size_t start
   return header;
 }
 
-std::string getFileNameFromContentDisposition(std::string &contentDisposition)
-{
-  size_t fileNameStartPosition = contentDisposition.find("filename=\"") + 10;
-  size_t fileNameEndPosition = contentDisposition.find("\"", fileNameStartPosition);
-  std::string fileName = contentDisposition.substr(fileNameStartPosition, fileNameEndPosition - fileNameStartPosition);
-
-  return fileName;
-}
-
 std::string httpRequestToString(HTTPRequest request)
 {
   std::stringstream requestSS;
@@ -118,7 +109,6 @@ std::string httpResponseToString(HTTPResponse response)
   std::stringstream responseSS;
   responseSS << response.protocol + " " << response.code << " " << response.status + "\r\n"
              << CONTENT_LENGTH_HEADER << ": " << response.contentLength << "\r\n"
-             << CONTENT_DISPOSITION_HEADER << ": " << response.contentDisposition << "\r\n"
              << CONTENT_TYPE_HEADER << ": " << response.contentType << "\r\n"
              << "\r\n"
              << response.body;
@@ -141,7 +131,6 @@ HTTPResponse parseResponse(std::string &res)
   std::string status = res.substr(statusStartPosition, statusEndPosition - statusStartPosition);
 
   std::string contentLength = getHeader(CONTENT_LENGTH_HEADER, res, statusEndPosition);
-  std::string contentDisposition = getHeader(CONTENT_DISPOSITION_HEADER, res, statusEndPosition);
   std::string contentType = getHeader(CONTENT_TYPE_HEADER, res, statusEndPosition);
 
   size_t bodyStartPosition = res.find("\r\n\r\n") + 4;
@@ -152,8 +141,62 @@ HTTPResponse parseResponse(std::string &res)
       atoi(code.c_str()),
       status,
       atoi(contentLength.c_str()),
-      contentDisposition,
       contentType,
       body,
   };
+}
+
+/**
+ * Read until header termination is found ("\r\n\r\n").
+ * As only GET requests are supported we don't need to worry about a body.
+ */
+std::string readRequestFromSocket(int socket)
+{
+  const int BUFFER_LENGTH = 1024;
+  char buffer[BUFFER_LENGTH];
+
+  int bytesRead;
+  std::string requestString = "";
+
+  do
+  {
+    memset(buffer, '\0', sizeof(buffer));
+    bytesRead = recv(socket, buffer, BUFFER_LENGTH, 0);
+    if (bytesRead == -1)
+    {
+      perror("recv");
+    }
+
+    requestString += buffer;
+  } while (requestString.find(HEADERS_TERMINATION) == std::string::npos);
+
+  return requestString;
+}
+
+/**
+ * Read until socket is closed.
+ * Socket is closed after message is sent (server side).
+ * Connection close header is sent to ensure this happens (client side).
+ */
+std::string readResponseFromSocket(int socket)
+{
+  const int BUFFER_LENGTH = 1024;
+  char buffer[BUFFER_LENGTH];
+
+  int bytesRead;
+  std::string responseString = "";
+
+  do
+  {
+    memset(buffer, '\0', sizeof(buffer));
+    bytesRead = recv(socket, buffer, BUFFER_LENGTH, 0);
+    if (bytesRead == -1)
+    {
+      perror("recv");
+    }
+
+    responseString += buffer;
+  } while (bytesRead > 0);
+
+  return responseString;
 }

@@ -34,8 +34,9 @@
 #define DEFAULT_CONNECTION_HEADER "close"
 
 #define CONTENT_LENGTH_HEADER "Content-Length"
-#define CONTENT_DISPOSITION_HEADER "Content-Disposition"
 #define CONTENT_TYPE_HEADER "Content-Type"
+
+#define HEADERS_TERMINATION "\r\n\r\n"
 
 int getIpFromHostname(char *, char **);
 std::string hostToIp(const std::string &);
@@ -64,16 +65,19 @@ typedef struct HTTPResponse
   int code;
   std::string status;
   int contentLength;
-  std::string contentDisposition;
   std::string contentType;
   std::string body;
 } HTTPResponse;
 
 std::string getHeader(std::string, std::string &, size_t);
-std::string getFileNameFromContentDisposition(std::string &);
+
 std::string httpRequestToString(HTTPRequest);
+std::string readRequestFromSocket(int);
 HTTPRequest parseRequest(std::string &);
+
 std::string httpResponseToString(HTTPResponse);
+std::string readResponseFromSocket(int);
 HTTPResponse parseResponse(std::string &);
+
 
 #endif

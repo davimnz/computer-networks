@@ -39,15 +39,7 @@ HTTPResponse Client::makeRequest(HTTPRequest request)
 
   send(socket, requestString.c_str(), requestString.size(), 0);
 
-  char buffer[1024];
-  memset(buffer, '\0', sizeof(buffer));
-
-  if (recv(socket, buffer, 1024, 0) == -1)
-  {
-    perror("recv");
-  }
-
-  std::string responseString = buffer;
+  std::string responseString = readResponseFromSocket(socket);
 
   auto response = parseResponse(responseString);
 
@@ -56,25 +48,33 @@ HTTPResponse Client::makeRequest(HTTPRequest request)
   return response;
 }
 
-void Client::handleResponse(HTTPResponse response, std::string &storage)
+void Client::handleResponse(HTTPResponse response, std::string &savePath)
 {
   if (response.code != OK_CODE)
   {
     return;
   }
 
-  std::string fileName = getFileNameFromContentDisposition(response.contentDisposition);
-
-  std::cout << "Saving file " << fileName << std::endl;
-
-  std::string path = storage + "/" + fileName;
+  std::cout << "Saving file to " << savePath << std::endl;
 
   std::ofstream file;
-  file.open(path);
+  file.open(savePath);
 
   file << response.body;
 
   file.close();
+}
+
+std::string Client::getSavePath(std::string &route, std::string &storage)
+{
+  std::string fileName = route.substr(route.find_last_of("/") + 1);
+
+  if (fileName.compare("") == 0)
+  {
+    fileName = "index.html";
+  }
+
+  return storage + "/" + fileName;
 }
 
 void Client::close()

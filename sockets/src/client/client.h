@@ -34,6 +34,7 @@ public:
   void connect();
   HTTPResponse makeRequest(HTTPRequest);
   void handleResponse(HTTPResponse, std::string &);
+  static std::string getSavePath(std::string &, std::string &);
   void close();
 };
 
