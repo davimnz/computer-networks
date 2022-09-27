@@ -32,10 +32,14 @@ Run the client binary from the root directory
 ./bin/client [URL 1] [URL 2]...
 ```
 
-Example:
+Examples:
 
 ```bash
 ./bin/client localhost:8080
+```
+
+```bash
+./bin/client www.ita.br
 ```
 
 This will make a **GET** request to all the URLs specified and will save the objects received from them inside the `recv` directory. If making a request to the HOST=`localhost` make sure to first run the server binary and also to include the port as the default port set is `80`.
